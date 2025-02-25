@@ -1,12 +1,16 @@
-import express from "express";
+import express from 'express';
+import cors from 'cors';
+//import messageRoutes from './routes/message.routes.js';
+import homeRoutes from "./routes/home.routes.js";
+
 const app = express();
-const port = 3000;
 
-app.get('/' ,(req, res) => {
-    res.send("hello");
-});
+// Middleware chung
+app.use(cors());
+app.use(express.json());
 
-app.listen(port, () => {
-    console.log(`server is listen on port ${port}`);
-});
+// Routes
+//app.use('/api/messages', messageRoutes);
+app.use(homeRoutes);
 
+export default app;

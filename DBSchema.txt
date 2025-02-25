@@ -1,0 +1,73 @@
+// Bảng User
+CREATE TABLE Users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(100) NOT NULL,
+    email VARCHAR(150) NOT NULL,
+    password VARCHAR(255) NOT NULL,  -- lưu trữ mật khẩu đã được hash
+    avatar VARCHAR(255) DEFAULT NULL,  -- ảnh đại diện (nếu có)
+    bio TEXT DEFAULT NULL,             -- giới thiệu cá nhân
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_username (username),
+    INDEX idx_email (email)
+);
+
+
+// Bảng friendship
+CREATE TABLE Friendships (
+    user_id INT,
+    friend_id INT,
+    status ENUM('pending', 'accepted', 'blocked') DEFAULT 'pending',  -- pending: đang chờ xác nhận, accepted: đã kết bạn, blocked: chặn
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, friend_id),
+    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE,
+    FOREIGN KEY (friend_id) REFERENCES Users(id) ON DELETE CASCADE
+);
+
+
+
+// Bảng conversation
+CREATE TABLE Conversations (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    type ENUM('private', 'group') DEFAULT 'private',  -- private: 1-1 chat, group: nhóm chat
+    name VARCHAR(100) DEFAULT NULL,  -- tên nhóm, chỉ áp dụng cho nhóm chat
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+
+
+// Bảng chỉ những người tham gia trong nhóm chat
+CREATE TABLE Conversation_Members (
+    conversation_id INT,
+    user_id INT,
+    joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (conversation_id, user_id),
+    FOREIGN KEY (conversation_id) REFERENCES Conversations(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE
+);
+
+// Bảng tin nhắn
+CREATE TABLE Messages (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    conversation_id INT NOT NULL,
+    sender_id INT NOT NULL,
+    content TEXT,  -- nội dung tin nhắn văn bản (có thể để NULL nếu chỉ gửi file)
+    message_type ENUM('text', 'image', 'video', 'file') DEFAULT 'text',
+    attachment_url VARCHAR(255) DEFAULT NULL,  -- đường dẫn đến file đính kèm nếu có
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (conversation_id) REFERENCES Conversations(id) ON DELETE CASCADE,
+    FOREIGN KEY (sender_id) REFERENCES Users(id) ON DELETE CASCADE
+);
+
+
+
+// Bảng lưu trạng thái của tin nhắn
+CREATE TABLE Message_Status (
+    message_id INT,
+    user_id INT,
+    status ENUM('sent', 'delivered', 'read') DEFAULT 'sent',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (message_id, user_id),
+    FOREIGN KEY (message_id) REFERENCES Messages(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE
+);
