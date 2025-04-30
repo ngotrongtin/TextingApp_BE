@@ -31,9 +31,14 @@ const sendFriendRequest = async (req, res) => {
 // Chấp nhận lời mời kết bạn
 const acceptFriendRequest = async (req, res) => {
   try {
-    const { requestId } = req.body;
+    const { friendId } = req.body;
+    const currentUserId = req.user._id;
+    const request = await Friendship.findOne({
+      user_id: friendId, // Người gửi lời mời
+      friend_id: currentUserId, // Người nhận là mình
+      status: "pending",
+    });
 
-    const request = await Friendship.findById(requestId);
     if (!request || request.status !== "pending") {
       return res
         .status(404)
@@ -60,17 +65,25 @@ const acceptFriendRequest = async (req, res) => {
 // Hủy hoặc từ chối lời mời
 const cancelFriendRequest = async (req, res) => {
   try {
-    const { requestId } = req.body;
+    const { friendId } = req.body;
     const currentUserId = req.user._id;
+
+    // Có thể là mình gửi hoặc mình nhận
     const result = await Friendship.findOneAndDelete({
-      _id: requestId,
       $or: [
-        { user_id: currentUserId },
-        { friend_id: currentUserId }
-      ]
+        { user_id: currentUserId, friend_id: friendId },
+        { user_id: friendId, friend_id: currentUserId },
+      ],
+      status: "pending",
     });
 
-    res.json({ message: "Đã hủy lời mời." });
+    if (!result) {
+      return res
+        .status(404)
+        .json({ message: "Không tìm thấy lời mời để huỷ." });
+    }
+
+    res.json({ message: "Đã huỷ lời mời kết bạn." });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -84,9 +97,11 @@ const getFriends = async (req, res) => {
     const friends = await Friendship.find({
       user_id: userId,
       status: "accepted",
-    }).populate("friend_id", "name email");
+    }).populate("friend_id", "username email avatar bio");
+    // Chỉ lấy thông tin người bạn
+    const listfriend = friends.map((item) => item.friend_id);
 
-    res.json(friends);
+    res.status(200).json({ listfriend });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -124,6 +139,41 @@ const getSentRequests = async (req, res) => {
   }
 };
 
+// Hàm tìm trạng thái kết bạn giữa hai người
+const getFriendshipStatus = async (req, res) => {
+  const { friendId } = req.body; // Lấy userId và friendId từ body của yêu cầu
+  const userId = req.user._id; // ID của người dùng hiện tại
+  // Kiểm tra mối quan hệ giữa userId và friendId
+  const friendship = await Friendship.findOne({
+    $or: [
+      { user_id: userId, friend_id: friendId }, // Người gửi kết bạn là userId
+      { user_id: friendId, friend_id: userId }, // Người gửi kết bạn là friendId
+    ],
+  });
+
+  if (!friendship) {
+    return res.status(200).json({ status: "Kết bạn" });
+  }
+
+  // Kiểm tra trạng thái và trả về thông báo tương ứng
+  if (friendship.status === "pending") {
+    // Nếu trạng thái là "pending", kiểm tra người gửi kết bạn là ai
+    if (friendship.user_id.toString() === userId.toString()) {
+      return res.status(200).json({ status: "Huỷ lời mời kết bạn" }); // Người gửi kết bạn là userId
+    } else {
+      return res.status(200).json({ status: "Chấp nhận lời mời" }); // Người gửi kết bạn là friendId
+    }
+  }
+
+  if (friendship.status === "accepted") {
+    return res.status(200).json({ status: "Bạn bè" }); // Trạng thái là đã chấp nhận kết bạn
+  }
+
+  if (friendship.status === "blocked") {
+    return res.status(200).json({ status: "Đã bị chặn" }); // Trạng thái bị chặn
+  }
+};
+
 export {
   sendFriendRequest,
   acceptFriendRequest,
@@ -131,4 +181,5 @@ export {
   getFriends,
   getIncomingRequests,
   getSentRequests,
+  getFriendshipStatus,
 };

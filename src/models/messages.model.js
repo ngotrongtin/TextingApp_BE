@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
 
 const messageSchema = new mongoose.Schema({
-  conversation_id: { 
+  group_id: { 
     type: mongoose.Schema.Types.ObjectId, 
-    ref: 'Conversation', 
+    ref: 'Group', 
     required: true 
   },
   sender_id: { 

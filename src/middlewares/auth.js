@@ -11,10 +11,10 @@ const authMiddleware = (req, res, next) => {
 
     // Giải mã token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log("Decoded user:", decoded);
-
+    
     // Gắn thông tin người dùng vào req.user
     req.user = decoded;
+
 
     next(); // Tiếp tục xử lý request
   } catch (err) {

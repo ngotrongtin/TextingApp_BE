@@ -6,6 +6,7 @@ import {
   getFriends,
   getIncomingRequests,
   getSentRequests,
+  getFriendshipStatus,
 } from "../controllers/user_friends.controller.js";
 const router = express.Router();
 
@@ -21,4 +22,6 @@ router.get("/list", getFriends);
 router.get("/incoming_requests", getIncomingRequests);
 // Lấy danh sách lời mời đã gửi
 router.get("/sent_requests", getSentRequests);
+// Lấy trạng thái kết bạn giữa hai người
+router.post("/status", getFriendshipStatus);
 export default router;

@@ -1,9 +1,9 @@
 import express from 'express';
-import { sendMessage } from '../controllers/message.controller.js';
+import { getMessagesByGroup } from '../controllers/messaging.controller.js';
 
 const router = express.Router();
 
-// Route gửi tin nhắn
-router.post('/', sendMessage);
+// route trả về tin nhắn theo groupId
+router.get('/:groupId', getMessagesByGroup);
 
 export default router;
