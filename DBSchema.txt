@@ -40,6 +40,7 @@ CREATE TABLE Conversations (
 CREATE TABLE Conversation_Members (
     conversation_id INT,
     user_id INT,
+    role ENUM('member', 'admin') DEFAULT 'member', -- Xác định vai trò trong nhóm
     joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (conversation_id, user_id),
     FOREIGN KEY (conversation_id) REFERENCES Conversations(id) ON DELETE CASCADE,
@@ -60,13 +61,12 @@ CREATE TABLE Messages (
 );
 
 
-
 // Bảng lưu trạng thái của tin nhắn
 CREATE TABLE Message_Status (
     message_id INT,
     user_id INT,
     status ENUM('sent', 'delivered', 'read') DEFAULT 'sent',
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- Cập nhật tự động khi trạng thái thay đổi
     PRIMARY KEY (message_id, user_id),
     FOREIGN KEY (message_id) REFERENCES Messages(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE

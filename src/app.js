@@ -8,10 +8,19 @@ import userRoutes from "./routes/user.routes.js";
 import userFriendshipsRoutes from "./routes/user_friendships.routes.js";
 import groupRoutes from "./routes/group.routes.js";
 import authRoutes from "./routes/auth.routes.js";
+import path from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 const app = express();
 
 app.use(cookieParser());
 // Middleware chung
+
+// Serve static files from dist/
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+app.use(express.static(path.join(__dirname, '../dist')));
+
 app.use(
   cors({
     origin: "http://localhost:5173", 
@@ -19,6 +28,8 @@ app.use(
   })
 );
 app.use(express.json());
+
+
 
 // Routes
 app.use('/api/messages', authMiddleware, messageRoutes);

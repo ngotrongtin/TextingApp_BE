@@ -1,8 +1,7 @@
-// /src/socket/index.js
 import Message from "../models/messages.model.js";
 import MessageStatus from "../models/message_status.model.js";
 import GroupMember from "../models/group_members.model.js";
-export const socketHandler = (socket, io) => {
+export const messagingSocketHandler = (socket, io) => {
   // Join room
   socket.on("joinRoom", (groupId) => {
     socket.join(groupId);
@@ -77,4 +76,33 @@ const getMessagesByGroup = async (req, res) => {
   }
 };
 
-export { getMessagesByGroup };
+const uploadMessageFile = async (req, res) => {
+  try {
+    const { file } = req;
+    if (!file) {
+      return res.status(400).json({ message: "Không có file nào được tải lên" });
+    }
+
+    // Trả về URL của file đã tải lên
+    res.status(200).json({ fileUrl: file.path });
+  } catch (err) {
+    console.error("Error uploading file:", err);
+    res.status(500).json({ message: "Lỗi server khi tải lên file" });
+  }
+
+  // try {
+  //   const fileData = req.file;
+
+  //   return res.json({
+  //     success: true,
+  //     url: fileData.path,      // link truy cập file
+  //     public_id: fileData.filename, // ID quản lý trên Cloudinary
+  //     type: fileData.mimetype,
+  //   });
+  // } catch (error) {
+  //   console.error(error);
+  //   return res.status(500).json({ success: false, message: 'Upload failed' });
+  // }
+}
+
+export { getMessagesByGroup, uploadMessageFile };

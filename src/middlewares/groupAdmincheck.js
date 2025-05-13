@@ -1,10 +1,13 @@
 import GroupMember from "../models/group_members.model.js";
 const adminCheck = async (req, res, next) => {
   try {
-    const { groupId } = req.body;
+    const groupId = req.params.groupId || req.query.groupId; // Ưu tiên params hoặc query
     const userId = req.user._id;
 
-    // Kiểm tra xem người dùng hiện tại có phải admin của nhóm không
+    if (!groupId) {
+      return res.status(400).json({ message: "Thiếu groupId" });
+    }
+
     const adminCheck = await GroupMember.findOne({
       group_id: groupId,
       user_id: userId,
@@ -12,15 +15,16 @@ const adminCheck = async (req, res, next) => {
     });
 
     if (!adminCheck) {
-      return res
-        .status(403)
-        .json({ message: "Bạn không có quyền xóa thành viên trong nhóm này" });
+      return res.status(403).json({
+        message: "Bạn không có quyền thực hiện thao tác này trong nhóm",
+      });
     }
 
-    next(); // Tiếp tục xử lý request
+    next();
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 export default adminCheck;

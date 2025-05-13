@@ -8,15 +8,15 @@ import {
   getStrangeUsers,
 } from "../controllers/users.controller.js";
 import express from "express";
-import isSignedIn from "../middlewares/checkNotAuthenticated.js";
+import checkNotAuthenticated from "../middlewares/checkNotAuthenticated.js";
 import { UserValidation } from "../middlewares/validation.js";
 import upload from "../middlewares/uploads.js";
 import authMiddleware from "../middlewares/auth.js";
 const router = express.Router();
 // Đăng ký người dùng mới
-router.post("/register", UserValidation, isSignedIn, registerUser);
+router.post("/register", UserValidation, checkNotAuthenticated, registerUser);
 // Đăng nhập người dùng
-router.post("/login", isSignedIn, loginUser);
+router.post("/login", checkNotAuthenticated, loginUser);
 // Đăng xuất người dùng
 router.post("/logout", logoutUser);
 // Cập nhật thông tin người dùng
