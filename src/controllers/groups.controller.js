@@ -256,12 +256,21 @@ const deleteGroup = async (req, res) => {
   try {
     const groupId = req.params.groupId;
 
-    // Xóa nhóm
+    // 3. Xóa nhóm
     await Group.findByIdAndDelete(groupId);
 
-    // Xóa tất cả thành viên trong nhóm
+    // 2. Xóa tất cả thành viên trong nhóm
     await GroupMember.deleteMany({ group_id: groupId });
 
+    // 3. Tìm tất cả message trong nhóm
+    const messages = await Message.find({ group_id: groupId }).select("_id");
+    const messageIds = messages.map((msg) => msg._id);
+
+    // 4. Xóa messageStatus liên quan đến các message này
+    await MessageStatus.deleteMany({ message_id: { $in: messageIds } });
+
+    // 5. Xóa messages
+    await Message.deleteMany({ group_id: groupId });
     res.status(200).json({ message: "Xóa nhóm thành công" });
   } catch (err) {
     res.status(500).json({ message: err.message });

@@ -41,7 +41,7 @@ const loginUser = async (req, res) => {
     res.cookie("token", token, {
       httpOnly: false, // 👈 không cho JS truy cập, giúp chống XSS
       secure: false, // true nếu dùng HTTPS
-      maxAge: 24 * 60 * 60 * 1000, // 1 ngày
+      maxAge: 24 * 60 * 60 * 1000 * 3, // 3 ngày
     });
     res.json({
       token,
