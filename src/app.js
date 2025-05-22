@@ -38,4 +38,9 @@ app.use("/api/user", userRoutes);
 app.use("/api/user_friendships", authMiddleware, userFriendshipsRoutes);
 app.use("/api/groups", authMiddleware, groupRoutes);
 app.use("/api", authRoutes);
+
+
+app.use((req, res, next) => {
+  res.status(404).send('404 Not Found - Trang bạn tìm không tồn tại!');
+});
 export default app;

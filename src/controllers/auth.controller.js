@@ -1,4 +1,4 @@
-// controllers/userController.js
+
 import User from "../models/users.model.js";
 
 const getCurrentUser = async (req, res) => {
